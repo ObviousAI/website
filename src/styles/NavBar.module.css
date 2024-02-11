@@ -1,0 +1,56 @@
+/* NavBar.module.css */
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fafafa; /* very light gray */
+    position: sticky;
+    top: 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), /* subtle shadow */
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 10; /* Ensure it's above other content */
+    height: 4rem;
+}
+
+.nav .title {
+    font-size: 2rem;
+    margin: 0.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: #5900c9; /* You can also soften the color for a fresher look */
+}
+
+.nav ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.nav ul li {
+    list-style: none;
+}
+
+.nav a {
+    display: block;
+    text-decoration: none;
+    color: black;
+    margin-right: 1rem;
+    border-radius: 0.5rem;
+    justify-content: center;
+}
+
+.nav a:not(.active):hover {
+    text-decoration: underline;
+    text-decoration-color: black;
+}
+
+/* Additional styles for active link - assuming you have a class for it */
+.nav a.active {
+    color: #5900c9;
+    background-color: #e0e0e0; /* light background for the active link */
+}
+
+/* Optional: Add a transition for smooth color changes */
+.nav a {
+    transition: background-color 0.3s, color 0.3s;
+}

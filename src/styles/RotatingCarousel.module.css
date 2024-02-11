@@ -1,0 +1,25 @@
+.carouselContainer {
+  display: flex;
+  overflow: hidden;
+}
+
+.carouselImages {
+  display: flex;
+  animation: moveCarousel 20s linear infinite;
+}
+
+.carouselImage {
+  width: 400px;
+  height: auto;
+  margin-right: 80px;
+  margin-top: 2%
+}
+
+@keyframes moveCarousel {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}

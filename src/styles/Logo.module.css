@@ -1,0 +1,31 @@
+.logo {
+    background-color: transparent ;
+    padding-top: 10vh;
+    padding-bottom: 5vh;
+    font-size: 12rem;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.searchBarContainer {
+    padding-top: 0vh;
+    width: 40%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 200px;
+}
+
+.shopMy {
+
+    white-space: nowrap; /* Prevent line break for "Shop My" */
+}
+
+.styleContainer {
+
+color: #5900c9;
+
+
+}

@@ -1,0 +1,60 @@
+.searchBarWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  width: 100%;
+  gap: 0.5%;
+  padding: 1%;
+}
+
+.inputWrapper {
+  width: 50%;
+  max-width: 600px;
+  border-color: black;
+  height: 2.5rem;
+  padding: 0 15px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1); 
+  display: flex;
+  align-items: center;
+}
+
+.card {
+  width: 20%;
+  
+}
+
+.input {
+  border: none;
+  height: 100%;
+  font-size: 1.5rem; 
+  font-weight: 500; 
+  width: 100%;
+  margin-left: 10px;
+  font-family: 'Arial', sans-serif;
+  border-color: black;
+}
+
+/* Canvas for showing an image. Add a frame around the image, add top to botom margins, add a maximum height/width of some percentage of the view area. */
+.canvas {
+  border: 1px solid #b0b0b0;
+  margin-top: 5%;
+  margin-bottom: 5%;
+  max-height: 80%;
+}
+
+
+.modalSelect { 
+  align-self: center;
+}
+
+.input:focus {
+  outline: none;
+}
+
+#searchIcon {
+  color: #333; /* Changed to a neutral color */
+}
+
+
+
