@@ -35,7 +35,7 @@ export const SearchBar = () => {
         pathname: "/results",
         query: {
           q: null,
-          imageSearch: true,
+          imageSearch: false,
           imageName: null,
           component: selectedChoice,
         },
