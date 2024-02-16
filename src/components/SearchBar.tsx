@@ -1,23 +1,25 @@
-import React, { useState, useRef } from "react";
-import { useRouter } from "next/router";
-import { Modal, Box, Button, Typography } from "@mui/material";
-import AWS from "aws-sdk";
+import React from "react";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 
-import { ImageCanvas } from "./ImageUploaderCanvas";
+import { useState, useRef } from "react";
+import { useRouter } from "next/router";
+import { Box, Button, Modal, Typography } from "@mui/material";
 
 import "../styles/SearchBar.module.css";
 import styles from "../styles/SearchBar.module.css";
 
-const s3 = new AWS.S3({
-  accessKeyId: "AKIAXWYG7NAV44XWIGF5",
-  secretAccessKey: "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",
-  region: "us-east-2",
-});
+import { ImageCanvas } from "./ImageUploaderCanvas";
+import {
+  uploadToS3,
+  getJsonResponse,
+  searchRequestPayload,
+  routeInput,
+} from "../helpers";
+
+const ENDPOINTURL = process.env.NEXT_PUBLIC_AWS_API_ENDPOINT;
 
 export const SearchBar = () => {
   const router = useRouter();
-
   const [input, setInput] = useState("");
   const [upload, setUpload] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -27,45 +29,41 @@ export const SearchBar = () => {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const uploadToS3 = async (data: any) => {
-    const uniqueKey = "uploadImage";
-    const params = {
-      Bucket: "scrapingdatanew",
-      Key: uniqueKey,
-      Body: data,
-    };
-
-    try {
-      await s3.upload(params).promise();
-      return uniqueKey;
-    } catch (error) {
-      console.error("Error uploading data to S3:", error);
-      return null;
-    }
-  };
-
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      router.push(
-        `/results?imageSearch=false&encodedeimage=null&component=false&component=$null&q=${input}`
-      );
+      const routeObject: routeInput = {
+        pathname: "/results",
+        query: {
+          q: null,
+          imageSearch: true,
+          imageName: null,
+          component: selectedChoice,
+        },
+      };
+      router.push(routeObject);
     }
   };
 
   const handleSubmitButton = async () => {
     if (!imageSrc || !selectedChoice) return;
+    const base64Image = imageSrc.split(",")[1];
+    const key = await uploadToS3(base64Image);
 
-    const key = await uploadToS3(imageSrc);
+    // Convert to base64 actually
     const encodedChoice = selectedChoice !== "All" ? selectedChoice : null;
-    console.log(encodedChoice);
 
-    if (encodedChoice === null) {
-      router.push(`/results?imageSearch=true&component=null&q=null`);
-    } else {
-      router.push(
-        `/results?imageSearch=true&component=${encodedChoice}&q=null`
-      );
-    }
+    console.log(key);
+
+    const routeObject: routeInput = {
+      pathname: "/results",
+      query: {
+        q: null,
+        imageSearch: true,
+        imageName: key,
+        component: encodedChoice,
+      },
+    };
+    router.push(routeObject);
     setUpload(false);
   };
 
@@ -92,31 +90,25 @@ export const SearchBar = () => {
     const reader = new FileReader();
     reader.readAsDataURL(imageFile);
     reader.onload = async () => {
-      const base64Image = reader.result;
+      const image = reader.result;
 
-      if (typeof base64Image === "string") {
-        setImageSrc(base64Image); // Set the image source for canvas
-
-        try {
-          const response = await fetch(
-            `http://ec2-3-146-178-203.us-east-2.compute.amazonaws.com:5000/get_image_components`,
-            {
-              method: "POST",
-              body: JSON.stringify({
-                image: base64Image.split(",")[1], // Split to get the base64 part
-              }),
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          const items = await response.json();
-          setChoices(items);
-          // Use the response (items) as needed
-        } catch (error) {
-          console.error("Error fetching image components:", error);
-        }
+      if (typeof image === "string" && ENDPOINTURL !== undefined) {
+        setImageSrc(image); // Set the image source for canvas
+        // Convert the image to base64 actually
+        const base64Image = image.split(",")[1];
+        const request: searchRequestPayload = {
+          requestType: "POST",
+          imageName: null,
+          component: null,
+          searchQuery: null,
+          encodedImage: base64Image,
+        };
+        const components = await getJsonResponse(
+          ENDPOINTURL,
+          "/get_image_components",
+          request
+        );
+        setChoices(components);
       }
     };
     reader.onerror = (error) => {

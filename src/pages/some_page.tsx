@@ -1,12 +1,15 @@
 // pages/index.tsx
 import React from "react";
-import { RotatingCarousel, SearchBar, SearchBox } from "../components";
+import { SearchBar } from "../components/SearchBar";
+import { RotatingCarousel } from "../components";
 import styles from "../styles/App.module.css";
 
 const App = () => {
   return (
     <div className={styles.App}>
-      <SearchBar />
+      <div className={styles.searchBarContainer}>
+        <SearchBar />
+      </div>
       <RotatingCarousel />
     </div>
   );

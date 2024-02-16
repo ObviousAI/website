@@ -1,32 +1,28 @@
+import AWS from "aws-sdk";
 import React from "react";
-import axios from "axios";
+
+import { GetServerSideProps } from "next";
+import { Typography, Grid, Box } from "@mui/material";
+
 import styles from "../styles/results.module.css";
 
-import { Typography, Grid, Box } from "@mui/material";
 import { SearchBar, HoverableImageCard } from "../components";
-import { GetServerSideProps } from "next";
-import { Item } from "../helpers";
-
-import AWS from "aws-sdk";
+import { Item, searchRequestPayload } from "../helpers";
+import { getJsonResponse } from "../helpers/api";
 
 type ResultsProps = {
   items: Item[];
   searchQuery: string;
 };
 
-// const topSearches = [
-//   "Something that will make me look bulky",
-//   "Something that will make me look slim",
-//   "Something that will make me look taller",
-//   "Something that will make me look shorter",
-//   "Something that will make me look more muscular",
-// ];
-
 const s3 = new AWS.S3({
-  accessKeyId: "AKIAXWYG7NAV44XWIGF5",
-  secretAccessKey: "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",
+  accessKeyId: "AKIAXWYG7NAVSRIQFHK2",
+  secretAccessKey: "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",
   region: "us-east-2",
 });
+
+const ENDPOINTURL: string | undefined =
+  process.env.NEXT_PUBLIC_AWS_API_ENDPOINT;
 
 const Results: React.FC<ResultsProps> = ({ items, searchQuery }) => {
   const [validItems, setValidItems] = React.useState<Item[]>([]);
@@ -34,7 +30,6 @@ const Results: React.FC<ResultsProps> = ({ items, searchQuery }) => {
 
   React.useEffect(() => {
     setValidItems(items); // Initialize validItems with all items when the component mounts.
-    console.log(validItems);
   }, [items, validItems]);
 
   return (
@@ -86,97 +81,45 @@ const Results: React.FC<ResultsProps> = ({ items, searchQuery }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps<{ items: Item[] }> = async (
-  context: any
-) => {
-  const fetchFromS3 = async (key: any) => {
-    const params = {
-      Bucket: "scrapingdatanew",
-      Key: key,
-    };
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { query } = context;
+  const searchQuery = (query.q as string) || "";
+  const isImageSearch = query.imageSearch === "true";
+  let imageName = (query.imageName as string) || null;
+  const component = (query.component as string) || null;
 
-    try {
-      const data = await s3.getObject(params).promise();
-      return data.Body ? data.Body.toString() : null;
-    } catch (error) {
-      console.error("Error fetching data from S3:", error);
-      return null;
-    }
-  };
-
-  const isImage = context.query.imageSearch || "";
-  let items: Item[] = [];
-  let img = null;
-  if (isImage === "true") {
-    img = await fetchFromS3("uploadImage");
-  }
-  if (isImage === "false") {
-    const query = context.query.q || ""; // Assumes you pass the search term as "?q=term"
-    try {
-      const response = await axios.get(
-        `http://ec2-3-146-178-203.us-east-2.compute.amazonaws.com:5000/text_search_simple?prompt=${query}`
-      );
-      items = response.data;
-    } catch (error) {
-      console.error("Error fetching the items:", error);
-    }
+  if (ENDPOINTURL === undefined) {
+    console.error("Endpoint URL is undefined");
     return {
       props: {
-        items,
-        searchQuery: context.query.q,
+        items: [],
+        searchQuery: "",
       },
     };
-  } else if (img !== null) {
-    const component = context.query.component;
-    if (component !== "null") {
-      const response = await fetch(
-        `http://ec2-3-146-178-203.us-east-2.compute.amazonaws.com:5000/image_search_component`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            image: img.split(",")[1],
-            component: component,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      let resp = await response;
-      items = await resp.json();
-      console.log(items);
-      return {
-        props: {
-          items,
-          searchQuery: context.query.q,
-        },
-      };
-    } else {
-      const response = await fetch(
-        `http://ec2-3-146-178-203.us-east-2.compute.amazonaws.com:5000/image_search`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            image: img.split(",")[1],
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      items = await response.json();
-      return {
-        props: {
-          items,
-          searchQuery: context.query.q,
-        },
-      };
-    }
   }
+  // Ensure imageName is a string. For future reference, probably generate an interface to represent the query object/context object.
+  if (Array.isArray(imageName)) {
+    imageName = imageName[0]; // Example strategy: use the first item if it's an array
+  }
+
+  let endpointPath = "/text_search";
+  const request: searchRequestPayload = {
+    requestType: "GET",
+    imageName,
+    component,
+    searchQuery,
+    encodedImage: null,
+  };
+  if (isImageSearch) {
+    request.requestType = "POST";
+    endpointPath = component ? "/image_search_component" : "/image_search";
+  }
+  const items = await getJsonResponse(ENDPOINTURL, endpointPath, request);
+
   return {
     props: {
-      items: [], // or some default value
-      searchQuery: context.query.q,
+      items,
+      searchQuery,
     },
   };
 };

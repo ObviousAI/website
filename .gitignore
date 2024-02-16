@@ -1,6 +1,10 @@
 .env
+.next
 .tmux.conf
+
 README.md
+
+
 certs
 node_modules
 yarn-error.log
