@@ -5,7 +5,7 @@ import { searchRequestPayload } from './types';
 
 const postRequest = async (fullUrl: string, request: searchRequestPayload) => {
     // If it is a postRequest, we already have some information about the payload. It will be a component based one or a regular image search.
-    const { requestType, imageName, component, searchQuery, encodedImage } = request;
+    const { imageName, component, searchQuery, encodedImage } = request;
 
     const body = {
         imageName: imageName,
@@ -28,7 +28,7 @@ const postRequest = async (fullUrl: string, request: searchRequestPayload) => {
 
 const getRequest = async (fullUrl: string, request: searchRequestPayload) => {
     // If it is a getRequest, we already have some information about the payload. It will be a component based one or a regular image search.
-    const { requestType, imageName, component, searchQuery, encodedImage } = request;
+    const { imageName, component, searchQuery, encodedImage } = request;
 
     const response = await axios.get(fullUrl, {
         params: {

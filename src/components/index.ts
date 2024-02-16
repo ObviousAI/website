@@ -7,8 +7,8 @@ import Footer from "./Footer"
 import HoverableImageCard from "./ImageCard"
 import { SearchBar } from "./SearchBar"
 import TopSearches from "./TopSearches"
-import SearchBox from "./SearchBox"
+// import SearchBox from "./SearchBox"
 import { ImageCanvas } from "./ImageUploaderCanvas"
 
 export {App, Logo, DataSnackbar, RotatingCarousel, NavBar, Footer, HoverableImageCard, SearchBar, TopSearches,
-        ImageCanvas, SearchBox}
+        ImageCanvas}

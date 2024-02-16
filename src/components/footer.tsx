@@ -1,6 +1,5 @@
 import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useRouter } from "next/router";
 
 import styles from "../styles/Footer.module.css";
 
