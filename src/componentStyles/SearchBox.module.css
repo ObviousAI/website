@@ -1,0 +1,73 @@
+.searchBox {
+    display: flex;
+    justify-content: center;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+
+
+  }
+  
+  .searchForm {
+    display: flex;
+    width: 100%; /* Adjust the width as necessary */
+    max-width: 600px; /* Set a max-width for larger screens */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* subtle shadow */
+    border-radius: 5px; /* Rounded corners */
+    background: #FFFFFF; /* Light theme background */
+  }
+  
+  .searchInput {
+    flex-grow: 1;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px 0 0 5px;
+    font-size: 16px;
+  }
+  
+  .searchButton {
+    background-color: transparent;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 0 5px 5px 0; /* Rounded corners on the right side */
+    cursor: pointer;
+  }
+  
+  .searchButton .searchIcon {
+    font-size: 20px; /* Adjust size as needed */
+  }
+  
+  /* Focus styles */
+  .searchInput:focus,
+  .searchButton:focus {
+    outline: none; /* Removes the default focus outline */
+  }
+  
+  /* Placeholder text color */
+  .searchInput::placeholder {
+    color: #a2a2a2;
+  }
+  
+  .attachButton {
+    background-color: transparent;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  
+  .customFileUpload {
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  
+  .attachIcon {
+    font-size: 20px; /* Adjust size as needed */
+  }
+  /* Adjust for different screen sizes */
+  @media (max-width: 768px) {
+    .searchInput, .searchButton {
+      padding: 10px;
+    }
+  }
+  

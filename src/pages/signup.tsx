@@ -1,14 +1,6 @@
-import { useRouter } from "next/router";
 import React, { useState } from "react";
 import Link from "next/link";
-import {
-  Box,
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Snackbar,
-} from "@mui/material";
+import { Container, TextField, Button, Typography } from "@mui/material";
 import loginStyles from "../styles/login.module.css";
 
 function LoginPage(props: { name: string }) {
