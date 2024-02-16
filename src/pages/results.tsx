@@ -110,6 +110,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     searchQuery,
     encodedImage: null,
   };
+  console.log(isImageSearch);
   if (isImageSearch) {
     request.requestType = "POST";
     endpointPath = component ? "/image_search_component" : "/image_search";
