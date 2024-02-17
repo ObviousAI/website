@@ -9,11 +9,7 @@ const NavBar = () => {
         ShopMyStyle
       </Link>
       <ul className={styles.ul}>
-        <li className={styles.li}>
-          <Link href="/api/auth/login" passHref>
-            Login
-          </Link>
-        </li>
+        <li className={styles.li}></li>
         {/* <li className={styles.li}>
           <Link href="/favorites" passHref>
             Favorites

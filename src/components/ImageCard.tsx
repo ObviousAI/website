@@ -28,9 +28,10 @@ const HoverableImageCard = (item: any) => {
     setShowTooltip(false);
   };
 
-  console.log(item);
   return (
-    <CardActionArea href={usedItem.product_url}>
+    <CardActionArea
+      href={usedItem.vendor !== "hm_test" ? usedItem.product_url : "."}
+    >
       <Card
         sx={{
           display: "flex",
@@ -67,6 +68,23 @@ const HoverableImageCard = (item: any) => {
             padding: 1,
           }}
         >
+          {usedItem.vendor === "hm_test" && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                backgroundColor: "rgba(255, 0, 0, 0.7)", // Semi-transparent red background
+                color: "white",
+                padding: "2px 8px",
+                fontSize: "10px",
+                fontWeight: "bold",
+                borderRadius: "0px 0px 0px 5px", // Rounded corner on the top-left
+              }}
+            >
+              Test Data
+            </div>
+          )}
           <div
             ref={textRef}
             className={styles.truncateTextContainer}
