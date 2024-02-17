@@ -34,7 +34,7 @@ export const SearchBar = () => {
       const routeObject: routeInput = {
         pathname: "/results",
         query: {
-          q: null,
+          q: input,
           imageSearch: false,
           imageName: null,
           component: selectedChoice,
