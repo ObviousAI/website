@@ -74,7 +74,7 @@ const HoverableImageCard = (item: any) => {
                 position: "absolute",
                 top: 0,
                 right: 0,
-                backgroundColor: "rgba(255, 0, 0, 0.7)", // Semi-transparent red background
+                backgroundColor: "lightblue", // Semi-transparent red background
                 color: "white",
                 padding: "2px 8px",
                 fontSize: "10px",

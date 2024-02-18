@@ -45,7 +45,7 @@ const Results: React.FC<ResultsProps> = ({ items, searchQuery }) => {
         >
           {" "}
           ... showing results for{" "}
-          {queryValue === "null" ? "image upload" : queryValue}!
+          {queryValue.length === 0 ? "your image" : queryValue}!
         </Typography>
         {/* <TopSearches topSearches={topSearches} /> */}
       </div>
