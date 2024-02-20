@@ -109,7 +109,8 @@ export const SearchBar = () => {
     const reader = new FileReader();
     reader.readAsDataURL(imageFile);
     reader.onload = async () => {
-      const image = reader.result;
+      const image = reader.result as string;
+      //ignore the type error here, it is a known issue
       setImageSrc(image); // Set the image source for canvas
 
       if (
@@ -129,7 +130,7 @@ export const SearchBar = () => {
           vendor: vendor,
         };
         const components = await getJsonResponse(
-          ENDPOINTURL,
+          "nothing",
           "/get_image_components",
           request
         );
