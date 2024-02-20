@@ -16,7 +16,7 @@ const postRequest = async (fullUrl: string, request: searchRequestPayload) => {
     }
     const response = await axios.post(fullUrl, {
         method: "POST",
-        body: JSON.stringify(body),
+        json: JSON.stringify(body),
         headers: {
             "Content-Type": "application/json",
         },

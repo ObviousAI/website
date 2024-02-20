@@ -4,15 +4,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/router";
-import {
-  Box,
-  Button,
-  Modal,
-  Typography,
-  Checkbox,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+import { Box, Button, Modal, Typography, Checkbox } from "@mui/material";
 import { MenuProps } from "@mui/material/Menu";
 
 import "../styles/SearchBar.module.css";
@@ -36,7 +28,7 @@ export const SearchBar = () => {
   const [upload, setUpload] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [choices, setChoices] = useState<string[]>([]);
-  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
+  const [selectedChoice, setSelectedChoice] = useState<string | null>("All");
   const { vendor, useComponents } = useSearchStore((state) => {
     return { vendor: state.vendor, useComponents: state.useComponents };
   });
@@ -46,7 +38,9 @@ export const SearchBar = () => {
 
   React.useEffect(() => {
     // Wake up the model when we first load this page.
-    fetch(ENDPOINTURL + "/wakeup_model");
+    // dont fetch components here, just send a get request to wake up the model
+    // fetch(ENDPOINTURL + "/wakeup");
+    useSearchStore.setState({ useComponents: false });
   }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -66,9 +60,11 @@ export const SearchBar = () => {
   };
 
   const handleSubmitButton = async () => {
-    if (!imageSrc || !selectedChoice) return;
+    console.log("handling submission");
+    if (!imageSrc) return;
     const base64Image = imageSrc.split(",")[1];
     const key = await uploadToS3(base64Image);
+    console.log("Got until here, key:", key);
 
     // Convert to base64 actually
     const encodedChoice = selectedChoice !== "All" ? selectedChoice : null;
@@ -80,7 +76,7 @@ export const SearchBar = () => {
       query: {
         q: null,
         imageSearch: true,
-        imageName: key,
+        imageName: "https://scrapedphotos.s3.us-east-2.amazonaws.com/" + key,
         component: encodedChoice,
         vendor: vendor,
       },
@@ -99,6 +95,7 @@ export const SearchBar = () => {
     // This function loads in the image, and then also sets the imageSrc to the right src so the canvas can load the image.
     // Furthermore, it obtains the image components for a given image, sending the base64 encoding of the image as part of a json payload.
     // Then, we can provide the options to the users to select from.
+    useSearchStore.setState({ useComponents: !useComponents });
     setUpload(true);
 
     const fileInput = fileInputRef.current;
@@ -113,9 +110,14 @@ export const SearchBar = () => {
     reader.readAsDataURL(imageFile);
     reader.onload = async () => {
       const image = reader.result;
+      setImageSrc(image); // Set the image source for canvas
 
-      if (typeof image === "string" && ENDPOINTURL !== undefined) {
-        setImageSrc(image); // Set the image source for canvas
+      if (
+        typeof image === "string" &&
+        ENDPOINTURL !== undefined &&
+        useComponents &&
+        false
+      ) {
         // Convert the image to base64 actually
         const base64Image = image.split(",")[1];
         const request: searchRequestPayload = {
@@ -202,8 +204,8 @@ export const SearchBar = () => {
                     marginBottom: "5%",
                   }}
                 >
-                  <option value="" disabled>
-                    Select a choice
+                  <option value="" disabled={!useComponents}>
+                    All
                   </option>
                   {choices.map((choice, index) => (
                     <option key={index} value={choice}>
@@ -215,21 +217,27 @@ export const SearchBar = () => {
               <div />
             </div>
           )}
-          <Button
-            variant="outlined"
-            sx={{
-              maxWidth: 600,
-              height: "2.5rem",
-              backgroundColor: "#FFFFFF",
-              minWidth: "80px",
-              fontSize: "0.6rem",
-              color: "#000000",
-              borderColor: "#000000",
-            }}
-            onClick={handleSubmitButton}
-          >
-            Submit Choice
-          </Button>
+          <Box sx={{ display: "flex", flexDirection: "row", gap: "10%" }}>
+            <Button
+              variant="outlined"
+              sx={{
+                maxWidth: 600,
+                height: "2.5rem",
+                backgroundColor: "#FFFFFF",
+                minWidth: "80px",
+                fontSize: "0.6rem",
+                color: "#000000",
+                borderColor: "#000000",
+              }}
+              onClick={handleSubmitButton}
+            >
+              submit choice
+            </Button>
+            <Checkbox
+              checked={useComponents}
+              onChange={(e) => getImageComponents()}
+            />
+          </Box>
         </Box>
       </Modal>
 
