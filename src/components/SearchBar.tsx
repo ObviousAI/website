@@ -1,9 +1,19 @@
-import React from "react";
+import React, { use } from "react";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/router";
-import { Box, Button, Modal, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Modal,
+  Typography,
+  Checkbox,
+  Menu,
+  MenuItem,
+} from "@mui/material";
+import { MenuProps } from "@mui/material/Menu";
 
 import "../styles/SearchBar.module.css";
 import styles from "../styles/SearchBar.module.css";
@@ -15,6 +25,8 @@ import {
   searchRequestPayload,
   routeInput,
 } from "../helpers";
+import { useSearchStore } from "../lib/searchStore";
+import VendorMenu from "./VendorMenu";
 
 const ENDPOINTURL = process.env.NEXT_PUBLIC_AWS_API_ENDPOINT;
 
@@ -25,9 +37,17 @@ export const SearchBar = () => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [choices, setChoices] = useState<string[]>([]);
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
+  const { vendor, useComponents } = useSearchStore((state) => {
+    return { vendor: state.vendor, useComponents: state.useComponents };
+  });
 
   const rootRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    // Wake up the model when we first load this page.
+    fetch(ENDPOINTURL + "/wakeup_model");
+  }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -38,6 +58,7 @@ export const SearchBar = () => {
           imageSearch: false,
           imageName: null,
           component: selectedChoice,
+          vendor: vendor,
         },
       };
       router.push(routeObject);
@@ -61,6 +82,7 @@ export const SearchBar = () => {
         imageSearch: true,
         imageName: key,
         component: encodedChoice,
+        vendor: vendor,
       },
     };
     router.push(routeObject);
@@ -102,6 +124,7 @@ export const SearchBar = () => {
           component: null,
           searchQuery: null,
           encodedImage: base64Image,
+          vendor: vendor,
         };
         const components = await getJsonResponse(
           ENDPOINTURL,
@@ -234,6 +257,8 @@ export const SearchBar = () => {
             onChange={getImageComponents}
           />
         </div>
+        {/* Add a menu dropdown here, where you have multiple options and a scroller if necessary here, that says "wayfair search" */}
+        <VendorMenu />
       </div>
     </>
   );

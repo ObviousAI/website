@@ -9,6 +9,7 @@ import styles from "../styles/results.module.css";
 import { SearchBar, HoverableImageCard } from "../components";
 import { Item, searchRequestPayload } from "../helpers";
 import { getJsonResponse } from "../helpers/api";
+import { useSearchStore } from "../lib/searchStore";
 
 type ResultsProps = {
   items: Item[];
@@ -26,6 +27,7 @@ const ENDPOINTURL: string | undefined =
 
 const Results: React.FC<ResultsProps> = ({ items, searchQuery }) => {
   const [validItems, setValidItems] = React.useState<Item[]>([]);
+  const vendor = useSearchStore((state) => state.vendor);
   const queryValue = searchQuery || "";
 
   React.useEffect(() => {
@@ -87,6 +89,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const isImageSearch = query.imageSearch === "true";
   let imageName = (query.imageName as string) || null;
   const component = (query.component as string) || null;
+  const vendor = (query.vendor as string) || null;
 
   if (ENDPOINTURL === undefined) {
     console.error("Endpoint URL is undefined");
@@ -109,8 +112,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     component,
     searchQuery,
     encodedImage: null,
+    vendor: vendor,
   };
-  console.log(isImageSearch);
   if (isImageSearch) {
     request.requestType = "POST";
     endpointPath = component ? "/image_search_component" : "/image_search";

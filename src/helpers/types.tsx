@@ -27,6 +27,7 @@ export interface searchRequestPayload {
   component: stringOrNull;
   searchQuery: stringOrNull;
   encodedImage: stringOrNull;
+  vendor: stringOrNull;
 }
 
 export interface routeInput {
@@ -36,5 +37,6 @@ export interface routeInput {
     imageSearch: boolean;
     imageName: stringOrNull;
     component: stringOrNull;
+    vendor: stringOrNull;
   };
 }
