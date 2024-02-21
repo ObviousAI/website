@@ -1,0 +1,17 @@
+{
+  "config": {
+    "s3_bucket_prefix": "https://scrapedphotos.s3.us-east-2.amazonaws.com/",
+    "api": {
+      "current_version": "v2",
+      "api_endpoints": {
+        "debugEndpoint": "http://127.0.0.1:5000",
+        "v1": "http://ec2-3-137-162-221.us-east-2.compute.amazonaws.com:5000",
+        "v2": "https://simple-api-it6x.onrender.com"
+      }
+    },
+    "aws": {
+      "region": "us-east-2",
+      "bucket": "scrapedphotos"
+    }
+  }
+}

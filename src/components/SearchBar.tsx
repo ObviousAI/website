@@ -1,26 +1,31 @@
 import React, { use } from "react";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+// import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/router";
-import { Box, Button, Modal, Typography, Checkbox } from "@mui/material";
-import { MenuProps } from "@mui/material/Menu";
+// import { Box, Button, Modal, Typography, Checkbox } from "@mui/material";
+// import { MenuProps } from "@mui/material/Menu";
 
-import "../styles/SearchBar.module.css";
+import SearchModal from "./Modal";
 import styles from "../styles/SearchBar.module.css";
 
-import { ImageCanvas } from "./ImageUploaderCanvas";
+// import { ImageCanvas } from "./ImageUploaderCanvas";
 import {
   uploadToS3,
   getJsonResponse,
   searchRequestPayload,
   routeInput,
+  configJson,
 } from "../helpers";
 import { useSearchStore } from "../lib/searchStore";
 import VendorMenu from "./VendorMenu";
+import { config } from "../../config.json";
 
-const ENDPOINTURL = process.env.NEXT_PUBLIC_AWS_API_ENDPOINT;
+const configContents: configJson = config;
+const ENDPOINT =
+  // @ts-ignore
+  configContents.api.api_endpoints[configContents.api.current_version];
 
 export const SearchBar = () => {
   const router = useRouter();
@@ -32,15 +37,17 @@ export const SearchBar = () => {
   const { vendor, useComponents } = useSearchStore((state) => {
     return { vendor: state.vendor, useComponents: state.useComponents };
   });
+  debugger;
 
   const rootRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
+    debugger;
+    console.log(vendor, useComponents);
     // Wake up the model when we first load this page.
     // dont fetch components here, just send a get request to wake up the model
-    // fetch(ENDPOINTURL + "/wakeup");
-    useSearchStore.setState({ useComponents: false });
+    // fetch(ENDPOINT + "/wakeup");
   }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -60,11 +67,9 @@ export const SearchBar = () => {
   };
 
   const handleSubmitButton = async () => {
-    console.log("handling submission");
     if (!imageSrc) return;
     const base64Image = imageSrc.split(",")[1];
     const key = await uploadToS3(base64Image);
-    console.log("Got until here, key:", key);
 
     // Convert to base64 actually
     const encodedChoice = selectedChoice !== "All" ? selectedChoice : null;
@@ -76,7 +81,7 @@ export const SearchBar = () => {
       query: {
         q: null,
         imageSearch: true,
-        imageName: "https://scrapedphotos.s3.us-east-2.amazonaws.com/" + key,
+        imageName: config.s3_bucket_prefix + key,
         component: encodedChoice,
         vendor: vendor,
       },
@@ -95,6 +100,7 @@ export const SearchBar = () => {
     // This function loads in the image, and then also sets the imageSrc to the right src so the canvas can load the image.
     // Furthermore, it obtains the image components for a given image, sending the base64 encoding of the image as part of a json payload.
     // Then, we can provide the options to the users to select from.
+    console.log(useComponents);
     useSearchStore.setState({ useComponents: !useComponents });
     setUpload(true);
 
@@ -115,10 +121,11 @@ export const SearchBar = () => {
 
       if (
         typeof image === "string" &&
-        ENDPOINTURL !== undefined &&
+        ENDPOINT !== undefined &&
         useComponents &&
         false
       ) {
+        console.log(useComponents);
         // Convert the image to base64 actually
         const base64Image = image.split(",")[1];
         const request: searchRequestPayload = {
@@ -130,7 +137,6 @@ export const SearchBar = () => {
           vendor: vendor,
         };
         const components = await getJsonResponse(
-          "nothing",
           "/get_image_components",
           request
         );
@@ -144,103 +150,18 @@ export const SearchBar = () => {
 
   return (
     <>
-      <Modal
-        disablePortal
-        disableEnforceFocus
-        disableAutoFocus
-        open={upload}
-        onClose={() => {
-          setUpload(false);
-          setImageSrc(null);
-          setChoices([]);
-          setSelectedChoice(null);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-          }
-        }}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          maxWidth: "100%",
-        }}
-        container={() => rootRef.current}
-      >
-        <Box
-          sx={{
-            position: "relative",
-            width: "80%",
-            maxWidth: 600,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 5,
-            p: 4,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-          }}
-        >
-          {imageSrc && (
-            <div>
-              <ImageCanvas imageSrc={imageSrc} />
-              <div className={styles.modalSelect}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ marginBottom: 1, marginInline: "auto" }}
-                >
-                  Specify Choice:
-                </Typography>
-                <select
-                  value={selectedChoice || ""}
-                  onChange={(e) => setSelectedChoice(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    alignSelf: "center",
-                    borderRadius: "5px",
-                    border: "1px solid #ccc",
-                    marginBottom: "5%",
-                  }}
-                >
-                  <option value="" disabled={!useComponents}>
-                    All
-                  </option>
-                  {choices.map((choice, index) => (
-                    <option key={index} value={choice}>
-                      {choice}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div />
-            </div>
-          )}
-          <Box sx={{ display: "flex", flexDirection: "row", gap: "10%" }}>
-            <Button
-              variant="outlined"
-              sx={{
-                maxWidth: 600,
-                height: "2.5rem",
-                backgroundColor: "#FFFFFF",
-                minWidth: "80px",
-                fontSize: "0.6rem",
-                color: "#000000",
-                borderColor: "#000000",
-              }}
-              onClick={handleSubmitButton}
-            >
-              submit choice
-            </Button>
-            <Checkbox
-              checked={useComponents}
-              onChange={(e) => getImageComponents()}
-            />
-          </Box>
-        </Box>
-      </Modal>
+      <SearchModal
+        upload={upload}
+        choices={choices}
+        imageSrc={imageSrc}
+        selectedChoice={selectedChoice}
+        handleSubmitButton={handleSubmitButton}
+        getImageComponents={getImageComponents}
+        setUpload={setUpload}
+        setImageSrc={setImageSrc}
+        setChoices={setChoices}
+        setSelectedChoice={setSelectedChoice}
+      />
 
       <div className={styles.searchBarWrapper}>
         <div className={styles.inputWrapper}>

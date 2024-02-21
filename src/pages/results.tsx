@@ -7,9 +7,15 @@ import { Typography, Grid, Box } from "@mui/material";
 import styles from "../styles/results.module.css";
 
 import { SearchBar, HoverableImageCard } from "../components";
-import { Item, searchRequestPayload } from "../helpers";
+import { Item, configJson, searchRequestPayload } from "../helpers";
 import { getJsonResponse } from "../helpers/api";
 import { useSearchStore } from "../lib/searchStore";
+import { config } from "../../config.json";
+
+const configContents: configJson = config;
+const ENDPOINT =
+  // @ts-ignore
+  configContents.api.api_endpoints[configContents.api.current_version];
 
 type ResultsProps = {
   items: Item[];
@@ -21,9 +27,6 @@ const s3 = new AWS.S3({
   secretAccessKey: "lD53YUNdiRYAQ5MXlHd4LwcHEc0I7vm6hb0vlU54",
   region: "us-east-2",
 });
-
-const ENDPOINTURL: string | undefined =
-  process.env.NEXT_PUBLIC_AWS_API_ENDPOINT;
 
 const Results: React.FC<ResultsProps> = ({ items, searchQuery }) => {
   const [validItems, setValidItems] = React.useState<Item[]>([]);
@@ -91,7 +94,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const component = (query.component as string) || null;
   const vendor = (query.vendor as string) || null;
 
-  if (ENDPOINTURL === undefined) {
+  if (ENDPOINT === undefined) {
     console.error("Endpoint URL is undefined");
     return {
       props: {
@@ -107,7 +110,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   let endpointPath = "/text_search";
   const request: searchRequestPayload = {
-    requestType: "GET",
+    requestType: "POST",
     imageName,
     component,
     searchQuery,
@@ -115,10 +118,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     vendor: vendor,
   };
   if (isImageSearch) {
-    request.requestType = "POST";
     endpointPath = component ? "/image_search_component" : "/image_search";
   }
-  const items = await getJsonResponse(ENDPOINTURL, endpointPath, request);
+  const items = await getJsonResponse(endpointPath, request);
 
   return {
     props: {
