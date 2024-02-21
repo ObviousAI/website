@@ -1,22 +1,31 @@
-import React from "react";
+import React, { use } from "react";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+// import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/router";
-import { Box, Button, Modal, Typography } from "@mui/material";
+// import { Box, Button, Modal, Typography, Checkbox } from "@mui/material";
+// import { MenuProps } from "@mui/material/Menu";
 
-import "../styles/SearchBar.module.css";
+import SearchModal from "./Modal";
 import styles from "../styles/SearchBar.module.css";
 
-import { ImageCanvas } from "./ImageUploaderCanvas";
+// import { ImageCanvas } from "./ImageUploaderCanvas";
 import {
   uploadToS3,
   getJsonResponse,
   searchRequestPayload,
   routeInput,
+  configJson,
 } from "../helpers";
+import { useSearchStore } from "../lib/searchStore";
+import VendorMenu from "./VendorMenu";
+import { config } from "../../config.json";
 
-const ENDPOINTURL = process.env.NEXT_PUBLIC_AWS_API_ENDPOINT;
+const configContents: configJson = config;
+const ENDPOINT =
+  // @ts-ignore
+  configContents.api.api_endpoints[configContents.api.current_version];
 
 export const SearchBar = () => {
   const router = useRouter();
@@ -24,10 +33,22 @@ export const SearchBar = () => {
   const [upload, setUpload] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [choices, setChoices] = useState<string[]>([]);
-  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
+  const [selectedChoice, setSelectedChoice] = useState<string | null>("All");
+  const { vendor, useComponents } = useSearchStore((state) => {
+    return { vendor: state.vendor, useComponents: state.useComponents };
+  });
+  debugger;
 
   const rootRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    debugger;
+    console.log(vendor, useComponents);
+    // Wake up the model when we first load this page.
+    // dont fetch components here, just send a get request to wake up the model
+    // fetch(ENDPOINT + "/wakeup");
+  }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -38,6 +59,7 @@ export const SearchBar = () => {
           imageSearch: false,
           imageName: null,
           component: selectedChoice,
+          vendor: vendor,
         },
       };
       router.push(routeObject);
@@ -45,7 +67,7 @@ export const SearchBar = () => {
   };
 
   const handleSubmitButton = async () => {
-    if (!imageSrc || !selectedChoice) return;
+    if (!imageSrc) return;
     const base64Image = imageSrc.split(",")[1];
     const key = await uploadToS3(base64Image);
 
@@ -59,8 +81,9 @@ export const SearchBar = () => {
       query: {
         q: null,
         imageSearch: true,
-        imageName: key,
+        imageName: config.s3_bucket_prefix + key,
         component: encodedChoice,
+        vendor: vendor,
       },
     };
     router.push(routeObject);
@@ -77,6 +100,8 @@ export const SearchBar = () => {
     // This function loads in the image, and then also sets the imageSrc to the right src so the canvas can load the image.
     // Furthermore, it obtains the image components for a given image, sending the base64 encoding of the image as part of a json payload.
     // Then, we can provide the options to the users to select from.
+    console.log(useComponents);
+    useSearchStore.setState({ useComponents: !useComponents });
     setUpload(true);
 
     const fileInput = fileInputRef.current;
@@ -90,10 +115,17 @@ export const SearchBar = () => {
     const reader = new FileReader();
     reader.readAsDataURL(imageFile);
     reader.onload = async () => {
-      const image = reader.result;
+      const image = reader.result as string;
+      //ignore the type error here, it is a known issue
+      setImageSrc(image); // Set the image source for canvas
 
-      if (typeof image === "string" && ENDPOINTURL !== undefined) {
-        setImageSrc(image); // Set the image source for canvas
+      if (
+        typeof image === "string" &&
+        ENDPOINT !== undefined &&
+        useComponents &&
+        false
+      ) {
+        console.log(useComponents);
         // Convert the image to base64 actually
         const base64Image = image.split(",")[1];
         const request: searchRequestPayload = {
@@ -102,9 +134,9 @@ export const SearchBar = () => {
           component: null,
           searchQuery: null,
           encodedImage: base64Image,
+          vendor: vendor,
         };
         const components = await getJsonResponse(
-          ENDPOINTURL,
           "/get_image_components",
           request
         );
@@ -118,97 +150,18 @@ export const SearchBar = () => {
 
   return (
     <>
-      <Modal
-        disablePortal
-        disableEnforceFocus
-        disableAutoFocus
-        open={upload}
-        onClose={() => {
-          setUpload(false);
-          setImageSrc(null);
-          setChoices([]);
-          setSelectedChoice(null);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-          }
-        }}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          maxWidth: "100%",
-        }}
-        container={() => rootRef.current}
-      >
-        <Box
-          sx={{
-            position: "relative",
-            width: "80%",
-            maxWidth: 600,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 5,
-            p: 4,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-          }}
-        >
-          {imageSrc && (
-            <div>
-              <ImageCanvas imageSrc={imageSrc} />
-              <div className={styles.modalSelect}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ marginBottom: 1, marginInline: "auto" }}
-                >
-                  Specify Choice:
-                </Typography>
-                <select
-                  value={selectedChoice || ""}
-                  onChange={(e) => setSelectedChoice(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    alignSelf: "center",
-                    borderRadius: "5px",
-                    border: "1px solid #ccc",
-                    marginBottom: "5%",
-                  }}
-                >
-                  <option value="" disabled>
-                    Select a choice
-                  </option>
-                  {choices.map((choice, index) => (
-                    <option key={index} value={choice}>
-                      {choice}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div />
-            </div>
-          )}
-          <Button
-            variant="outlined"
-            sx={{
-              maxWidth: 600,
-              height: "2.5rem",
-              backgroundColor: "#FFFFFF",
-              minWidth: "80px",
-              fontSize: "0.6rem",
-              color: "#000000",
-              borderColor: "#000000",
-            }}
-            onClick={handleSubmitButton}
-          >
-            Submit Choice
-          </Button>
-        </Box>
-      </Modal>
+      <SearchModal
+        upload={upload}
+        choices={choices}
+        imageSrc={imageSrc}
+        selectedChoice={selectedChoice}
+        handleSubmitButton={handleSubmitButton}
+        getImageComponents={getImageComponents}
+        setUpload={setUpload}
+        setImageSrc={setImageSrc}
+        setChoices={setChoices}
+        setSelectedChoice={setSelectedChoice}
+      />
 
       <div className={styles.searchBarWrapper}>
         <div className={styles.inputWrapper}>
@@ -234,6 +187,8 @@ export const SearchBar = () => {
             onChange={getImageComponents}
           />
         </div>
+        {/* Add a menu dropdown here, where you have multiple options and a scroller if necessary here, that says "wayfair search" */}
+        <VendorMenu />
       </div>
     </>
   );

@@ -1,4 +1,5 @@
 type stringOrNull = string | null;
+
 export interface Item {
   color: string;
   description: string;
@@ -21,20 +22,15 @@ export interface searchBoxInput {
   onSubmit: (input: string) => void;
 }
 
-export interface searchRequestPayload {
-  requestType: "POST" | "GET";
-  imageName: stringOrNull;
-  component: stringOrNull;
-  searchQuery: stringOrNull;
-  encodedImage: stringOrNull;
-}
-
-export interface routeInput {
-  pathname: string;
-  query: {
-    q: stringOrNull;
-    imageSearch: boolean;
-    imageName: stringOrNull;
-    component: stringOrNull;
-  };
+export interface modalInput {
+  upload: boolean;
+  choices: string[];
+  imageSrc: stringOrNull;
+  selectedChoice: stringOrNull;
+  handleSubmitButton: () => void;
+  getImageComponents: () => void;
+  setUpload: (input: boolean) => void;
+  setImageSrc: (input: string | null) => void;
+  setChoices: (input: string[]) => void;
+  setSelectedChoice: (input: string | null) => void;
 }
