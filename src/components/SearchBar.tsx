@@ -37,18 +37,9 @@ export const SearchBar = () => {
   const { vendor, useComponents } = useSearchStore((state) => {
     return { vendor: state.vendor, useComponents: state.useComponents };
   });
-  debugger;
 
   const rootRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  React.useEffect(() => {
-    debugger;
-    console.log(vendor, useComponents);
-    // Wake up the model when we first load this page.
-    // dont fetch components here, just send a get request to wake up the model
-    // fetch(ENDPOINT + "/wakeup");
-  }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -100,7 +91,6 @@ export const SearchBar = () => {
     // This function loads in the image, and then also sets the imageSrc to the right src so the canvas can load the image.
     // Furthermore, it obtains the image components for a given image, sending the base64 encoding of the image as part of a json payload.
     // Then, we can provide the options to the users to select from.
-    console.log(useComponents);
     useSearchStore.setState({ useComponents: !useComponents });
     setUpload(true);
 
