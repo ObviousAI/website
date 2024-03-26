@@ -22,12 +22,6 @@ type ResultsProps = {
   searchQuery: string;
 };
 
-const s3 = new AWS.S3({
-  accessKeyId: "AKIAXWYG7NAVSRIQFHK2",
-  secretAccessKey: "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",
-  region: "us-east-2",
-});
-
 const Results: React.FC<ResultsProps> = ({ items, searchQuery }) => {
   const [validItems, setValidItems] = React.useState<Item[]>([]);
   const vendor = useSearchStore((state) => state.vendor);
