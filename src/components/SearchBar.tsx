@@ -54,8 +54,12 @@ export const SearchBar = () => {
 
   const handleSubmitButton = async () => {
     if (!imageSrc) return;
-    const base64Image = imageSrc.split(",")[1];
-    const key = await uploadToS3(base64Image);
+    let base64Image = "";
+    let key: string | null = "";
+    if (STATUS !== "Offline") {
+      base64Image = imageSrc.split(",")[1];
+      key = await uploadToS3(base64Image);
+    }
 
     const routeObject: routeInput = {
       pathname: STATUS !== "Offline" ? "/results" : "/offline",
@@ -72,7 +76,7 @@ export const SearchBar = () => {
   };
 
   const handleButtonClick = () => {
-    if (fileInputRef.current) {
+    if (fileInputRef.current && STATUS !== "Offline") {
       fileInputRef.current.click();
     }
   };
@@ -142,10 +146,10 @@ export const SearchBar = () => {
             onKeyPress={handleKeyPress}
             className={styles.input}
           />
-          <AddAPhotoIcon
+          {/* <AddAPhotoIcon
             className={styles.AddAPhotoIcon}
             onClick={handleButtonClick}
-          />
+          /> */}
           <input
             type="file"
             ref={fileInputRef}

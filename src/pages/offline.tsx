@@ -1,7 +1,7 @@
 // Create view that just says "Thank you for visiting our page! You can view the code for the project at _______, but we have stopped working on this to cut from monthly model and hosting costs." Then add a portion with a video that shows a demo of the website, and under it say "here is a demo of what the website looked like while online."
 import React from "react";
 
-import { Typography } from "@mui/material";
+import { Link, Typography } from "@mui/material";
 
 export default function Offline() {
   return (
@@ -11,19 +11,19 @@ export default function Offline() {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        gap: "20px",
+        gap: "40px",
         marginInline: "20%",
         marginBlock: "10%",
       }}
     >
-      <Typography variant="h4">
+      <Typography variant="h5">
         Thank you for visiting our projects page! You can view the code for the
-        project at https://github.com/ObviousAI/website (if you want to see the
-        code for the actual models and embeddings, reach me out on linkedin),
-        but we have stopped working on this to cut from monthly model and
-        hosting costs." Then add a portion with a video that shows a demo of the
-        website, and under it say "here is a demo of what the website looked
-        like while online.
+        project <Link href="https://github.com/ObviousAI/website">here</Link>{" "}
+        (if you want to see the code for the actual models and embeddings, reach
+        me out on linkedin), but we have stopped working on this to cut from
+        monthly model and hosting costs." Then add a portion with a video that
+        shows a demo of the website, and under it say "here is a demo of what
+        the website looked like while online.
       </Typography>
       <div>
         <iframe
@@ -37,7 +37,7 @@ export default function Offline() {
           allow="autoplay"
         ></iframe>
       </div>
-      <Typography variant="h4">
+      <Typography variant="h5">
         Above is a demo of what the website looked like while online.
       </Typography>
     </div>
