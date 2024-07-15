@@ -18,10 +18,9 @@ const Home = () => {
   };
 
   React.useEffect(() => {
-    debugger;
     // Wake up the model when we first load this page.
     // dont fetch components here, just send a get request to wake up the model
-    makeWakeUpRequest();
+    // makeWakeUpRequest();
     // Wait a random amount of seconds, between 2-3 seconds.
     setTimeout(() => {
       setLoading(false);

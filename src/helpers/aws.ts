@@ -1,13 +1,18 @@
-import AWS from "aws-sdk";
+import AWS from 'aws-sdk'
+import * as dotenv from 'dotenv';
+
 import { v4 as uuidv4 } from "uuid";
 
-const s3 = new AWS.S3({
-    accessKeyId: "AKIAXWYG7NAVSRIQFHK2",
-    secretAccessKey: "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",
-    region: "us-east-2",
-  });
 
-  
+dotenv.config();
+
+const s3 = new AWS.S3();
+
+s3.config.update({
+  region: 'us-east-2',
+  accessKeyId: process.env.OBVIOUS_AWS_KEY ?? '',
+  secretAccessKey: process.env.OBVIOUS_AWS_SECRET ?? '',
+})
 
 const fetchFromS3 = async (key: string) => {
     const params = {
@@ -45,6 +50,7 @@ const uploadToS3 = async (base64Data: string) => {
       ContentType: 'image/jpeg'
     };
 
+    console.log(s3)
     try {
       await s3.upload(params).promise();
       return uniqueKey;

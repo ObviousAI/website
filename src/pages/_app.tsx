@@ -1,4 +1,5 @@
 import React from "react";
+import * as dotenv from "dotenv";
 
 import type { AppProps } from "next/app";
 import { Box } from "@mui/system";
@@ -8,6 +9,7 @@ import "../styles/global.css";
 
 import { NavBar, Footer } from "../components";
 
+dotenv.config();
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <UserProvider>
