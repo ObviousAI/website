@@ -1,7 +1,9 @@
 // pages/index.tsx
 import React from "react";
-import { RotatingCarousel, SearchBar } from "../components";
+
 import styles from "../styles/App.module.css";
+
+import { RotatingCarousel, SearchBar } from "../components";
 
 const App = () => {
   return (
